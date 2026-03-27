@@ -195,8 +195,8 @@ footer a:hover{color:#65635e}
         <div class="wt-highlight"><strong>SLICE = PPLNS + Job Declaration.</strong> The subsidy is split by hashrate; the fees are split by hashrate × the quality of blocks each miner builds.</div>
       </div>
       <div class="wt-foot">
-        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
-        <button class="wt-next" onclick="WT.next()">Next →</button>
+        <button class="wt-skip" onclick="document.getElementById('wtBg').style.display='none'">Skip</button>
+        <button class="wt-next" onclick="document.getElementById('wt-panel-0').style.display='none';document.getElementById('wt-panel-1').style.display='block'">Next &rarr;</button>
       </div>
     </div>
 
@@ -216,8 +216,8 @@ footer a:hover{color:#65635e}
         <div class="wt-highlight">The <strong>window fill bar</strong> at the bottom of the timeline shows how full the 8× lookback window is. Until it hits 100%, miners are still in the ramp-up period.</div>
       </div>
       <div class="wt-foot">
-        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
-        <button class="wt-next" onclick="WT.next()">Next →</button>
+        <button class="wt-skip" onclick="document.getElementById('wtBg').style.display='none'">Skip</button>
+        <button class="wt-next" onclick="document.getElementById('wt-panel-1').style.display='none';document.getElementById('wt-panel-2').style.display='block'">Next &rarr;</button>
       </div>
     </div>
 
@@ -237,8 +237,8 @@ footer a:hover{color:#65635e}
         <div class="wt-highlight">Try the <strong>threshold buttons</strong> (5%–25%) while running. Lower = more, smaller slices = fairer cross-time scoring.</div>
       </div>
       <div class="wt-foot">
-        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
-        <button class="wt-next" onclick="WT.next()">Next →</button>
+        <button class="wt-skip" onclick="document.getElementById('wtBg').style.display='none'">Skip</button>
+        <button class="wt-next" onclick="document.getElementById('wt-panel-2').style.display='none';document.getElementById('wt-panel-3').style.display='block'">Next &rarr;</button>
       </div>
     </div>
 
@@ -258,8 +258,8 @@ footer a:hover{color:#65635e}
         <div class="wt-highlight">The <strong>Event Log</strong> narrates everything as it happens — slice closes, block finds, and efficiency gaps between miners.</div>
       </div>
       <div class="wt-foot">
-        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
-        <button class="wt-next" onclick="WT.next()">Let's go!</button>
+        <button class="wt-skip" onclick="document.getElementById('wtBg').style.display='none'">Skip</button>
+        <button class="wt-next" onclick="document.getElementById('wtBg').style.display='none'">Let's go!</button>
       </div>
     </div>
 
@@ -530,45 +530,7 @@ function minerById(id){
 })();
 
 // ── WALKTHROUGH ───────────────────────────────────────────────────────
-var STEPS=[
-  {
-    title:'Welcome to the SLICE Simulator',
-    body:'This simulator shows how DMND\'s SLICE payment system works in real time. You\'ll see the mempool, slices forming and closing, and how each miner gets paid based on both hashrate <em>and</em> block quality.',
-    hint:'<strong>SLICE = PPLNS + Job Declaration.</strong> The subsidy is split by hashrate; the fees are split by hashrate × the quality of blocks each miner builds.'
-  },
-  {
-    title:'Step 1 — Press Start',
-    body:'Hit <strong>▶ Start</strong> to begin. Use <strong>5×</strong> speed to fill the lookback window quickly, then drop to <strong>1×</strong> to watch individual slices form in detail.',
-    hint:'The <strong>window fill bar</strong> at the bottom of the timeline shows how full the 8× lookback window is. Until it hits 100%, miners are still ramping up.'
-  },
-  {
-    title:'Step 2 — Watch slices close',
-    body:'Each column in the timeline is one slice. Watch the <strong>fee chart</strong> — when the live rate (amber bar) crosses the <strong>green trigger line</strong>, the current slice closes and a new one opens. You\'ll see a brief flash on the new column.',
-    hint:'Try the <strong>threshold buttons</strong> (5%–25%) to see how slice frequency changes. Lower threshold = more, smaller slices = fairer cross-time scoring.'
-  },
-  {
-    title:'Step 3 — Click any slice to inspect it',
-    body:'Click any column in the timeline to open the detail panel. It shows exactly which miners contributed, their fee efficiency in that slice, and how the payout splits. Watch how <strong>Gamma Ops</strong> (100% eff) consistently scores above its hashrate share.',
-    hint:'The <strong>Event Log</strong> below the timeline narrates everything as it happens — slice closes, block finds, and efficiency gaps between miners.'
-  }
-];
-var wtStep=0;
-
-var WT={
-  next:function(){
-    gi('wt-panel-'+wtStep).style.display='none';
-    wtStep++;
-    if(wtStep>=4){
-      WT.skip();
-    } else {
-      gi('wt-panel-'+wtStep).style.display='block';
-    }
-  },
-  skip:function(){
-    var bg=gi('wtBg');
-    if(bg){bg.style.opacity='0';bg.style.transition='opacity .2s';setTimeout(function(){bg.style.display='none';},200);}
-  }
-};
+// walkthrough handled inline in HTML
 
 // ── EVENT LOG ─────────────────────────────────────────────────────────
 function addLog(icon,html,type){
