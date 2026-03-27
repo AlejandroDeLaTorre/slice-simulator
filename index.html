@@ -160,7 +160,7 @@ footer a:hover{color:var(--text2)}
     <a href="https://blog.dmnd.work/understanding-slice-pplns-jd/" target="_blank">SLICE</a>
     <a href="https://blog.dmnd.work/" target="_blank">Blog</a>
     <a href="https://onboarding.dmnd.work" target="_blank" class="nav-cta">Join Now</a>
-    <button id="themeBtn" onclick="SB.theme()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;border-radius:4px;transition:all .15s;margin-left:8px" title="Toggle light/dark">☀</button>
+    <button id="themeBtn" onclick="dmndTheme()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;border-radius:4px;transition:all .15s;margin-left:8px" title="Toggle light/dark">☀</button>
   </div>
 </nav>
 
@@ -611,18 +611,27 @@ window.SB={
     S.sel=(id===null||String(S.sel)===String(id))?null:id;
     if(S.sel===null){var dw=$('sbDetailWrap');if(dw)dw.style.display='none';}
     draw();
-  },
-  theme:function(){
-    var isLight=document.body.classList.toggle('light');
-    var btn=document.getElementById('themeBtn');
-    if(btn)btn.textContent=isLight?'☾':'☀';
-    localStorage.setItem('dmndTheme',isLight?'light':'dark');
   }
 };
-// restore theme
-var saved=localStorage.getItem('dmndTheme');
-if(saved==='light'){document.body.classList.add('light');var b=document.getElementById('themeBtn');if(b)b.textContent='☾';}
 draw();
+})();
+</script>
+<script>
+function dmndTheme(){
+  var body=document.body;
+  var btn=document.getElementById('themeBtn');
+  var isLight=body.classList.toggle('light');
+  if(btn)btn.textContent=isLight?'☾':'☀';
+  try{localStorage.setItem('dmndTheme',isLight?'light':'dark');}catch(e){}
+}
+(function(){
+  var saved;
+  try{saved=localStorage.getItem('dmndTheme');}catch(e){}
+  if(saved==='light'){
+    document.body.classList.add('light');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent='☾';
+  }
 })();
 </script>
 </body>
