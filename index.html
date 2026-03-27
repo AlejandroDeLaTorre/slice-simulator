@@ -178,15 +178,91 @@ footer a:hover{color:#65635e}
 <!-- WALKTHROUGH OVERLAY -->
 <div class="wt-bg" id="wtBg">
   <div class="wt-box">
-    <div class="wt-top">
-      <div class="wt-top-label">Quick start · <span id="wtInd">1 of 4</span></div>
-      <h2 id="wtTitle">Welcome to the SLICE Simulator</h2>
+
+    <div id="wt-panel-0">
+      <div class="wt-top">
+        <div class="wt-top-label">Quick start · 1 of 4</div>
+        <h2>Welcome to the SLICE Simulator</h2>
+      </div>
+      <div class="wt-body">
+        <div style="display:flex;gap:5px;margin-bottom:16px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#c0392b;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+        </div>
+        <p style="font-size:13px;color:#65635e;line-height:1.7;margin-bottom:12px">This simulator shows how DMND's SLICE payment system works in real time. You'll see the mempool, slices forming and closing, and how each miner gets paid based on both hashrate <em>and</em> block quality.</p>
+        <div class="wt-highlight"><strong>SLICE = PPLNS + Job Declaration.</strong> The subsidy is split by hashrate; the fees are split by hashrate × the quality of blocks each miner builds.</div>
+      </div>
+      <div class="wt-foot">
+        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
+        <button class="wt-next" onclick="WT.next()">Next →</button>
+      </div>
     </div>
-    <div class="wt-body" id="wtBody"></div>
-    <div class="wt-foot">
-      <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
-      <button class="wt-next" id="wtNext" onclick="WT.next()">Next →</button>
+
+    <div id="wt-panel-1" style="display:none">
+      <div class="wt-top">
+        <div class="wt-top-label">Quick start · 2 of 4</div>
+        <h2>Step 1 — Press Start</h2>
+      </div>
+      <div class="wt-body">
+        <div style="display:flex;gap:5px;margin-bottom:16px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#c0392b;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+        </div>
+        <p style="font-size:13px;color:#65635e;line-height:1.7;margin-bottom:12px">Hit <strong>▶ Start</strong> to begin. Use <strong>5×</strong> speed to fill the lookback window quickly, then drop to <strong>1×</strong> to watch individual slices form in detail.</p>
+        <div class="wt-highlight">The <strong>window fill bar</strong> at the bottom of the timeline shows how full the 8× lookback window is. Until it hits 100%, miners are still in the ramp-up period.</div>
+      </div>
+      <div class="wt-foot">
+        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
+        <button class="wt-next" onclick="WT.next()">Next →</button>
+      </div>
     </div>
+
+    <div id="wt-panel-2" style="display:none">
+      <div class="wt-top">
+        <div class="wt-top-label">Quick start · 3 of 4</div>
+        <h2>Step 2 — Watch slices close</h2>
+      </div>
+      <div class="wt-body">
+        <div style="display:flex;gap:5px;margin-bottom:16px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#c0392b;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#e5e3df;display:inline-block"></span>
+        </div>
+        <p style="font-size:13px;color:#65635e;line-height:1.7;margin-bottom:12px">Each column in the timeline is one slice. Watch the <strong>fee chart</strong> — when the amber bar crosses the <strong>green trigger line</strong>, the current slice closes and a new one opens with a brief flash.</p>
+        <div class="wt-highlight">Try the <strong>threshold buttons</strong> (5%–25%) while running. Lower = more, smaller slices = fairer cross-time scoring.</div>
+      </div>
+      <div class="wt-foot">
+        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
+        <button class="wt-next" onclick="WT.next()">Next →</button>
+      </div>
+    </div>
+
+    <div id="wt-panel-3" style="display:none">
+      <div class="wt-top">
+        <div class="wt-top-label">Quick start · 4 of 4</div>
+        <h2>Step 3 — Click any slice to inspect it</h2>
+      </div>
+      <div class="wt-body">
+        <div style="display:flex;gap:5px;margin-bottom:16px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#0f8f6a;display:inline-block"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:#c0392b;display:inline-block"></span>
+        </div>
+        <p style="font-size:13px;color:#65635e;line-height:1.7;margin-bottom:12px">Click any column in the timeline to open the detail panel. It shows each miner's fee efficiency and how the payout splits. Watch how <strong>Gamma Ops</strong> (100% eff) consistently earns above its hashrate share.</p>
+        <div class="wt-highlight">The <strong>Event Log</strong> narrates everything as it happens — slice closes, block finds, and efficiency gaps between miners.</div>
+      </div>
+      <div class="wt-foot">
+        <button class="wt-skip" onclick="WT.skip()">Skip tutorial</button>
+        <button class="wt-next" onclick="WT.next()">Let's go!</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -478,29 +554,14 @@ var STEPS=[
 ];
 var wtStep=0;
 
-function renderWT(){
-  var s=STEPS[wtStep];
-  gi('wtTitle').textContent=s.title;
-  gi('wtInd').textContent=(wtStep+1)+' of '+STEPS.length;
-  gi('wtBody').innerHTML=
-    '<div style="margin-bottom:14px">'+
-      STEPS.map(function(_,i){
-        var cls='wt-step-dot'+(i<wtStep?' done':i===wtStep?' active':'');
-        return '<span class="'+cls+'" style="display:inline-block;margin-right:5px"></span>';
-      }).join('')+
-    '</div>'+
-    '<p style="font-size:13px;color:#65635e;line-height:1.7;margin-bottom:12px">'+s.body+'</p>'+
-    '<div class="wt-highlight">'+s.hint+'</div>';
-  gi('wtNext').textContent=wtStep===STEPS.length-1?'Let\'s go!':'Next →';
-}
-
 var WT={
   next:function(){
+    gi('wt-panel-'+wtStep).style.display='none';
     wtStep++;
-    if(wtStep>=STEPS.length){
+    if(wtStep>=4){
       WT.skip();
     } else {
-      renderWT();
+      gi('wt-panel-'+wtStep).style.display='block';
     }
   },
   skip:function(){
@@ -508,9 +569,6 @@ var WT={
     if(bg){bg.style.opacity='0';bg.style.transition='opacity .2s';setTimeout(function(){bg.style.display='none';},200);}
   }
 };
-
-// init walkthrough
-renderWT();
 
 // ── EVENT LOG ─────────────────────────────────────────────────────────
 function addLog(icon,html,type){
