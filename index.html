@@ -592,15 +592,6 @@ function drawConclusion(w,roster,totSc){
   '</div>';
 }
 
-window.SB=Object.assign(window.SB||{},{
-  theme:function(){
-    var b=document.body;
-    var isLight=b.classList.toggle('light');
-    var btn=document.getElementById('themeBtn');
-    if(btn)btn.textContent=isLight?'☾':'☀';
-    localStorage.setItem('dmndTheme',isLight?'light':'dark');
-  }
-});
 window.SB={
   tog:function(){
     S.run=!S.run;
@@ -620,6 +611,12 @@ window.SB={
     S.sel=(id===null||String(S.sel)===String(id))?null:id;
     if(S.sel===null){var dw=$('sbDetailWrap');if(dw)dw.style.display='none';}
     draw();
+  },
+  theme:function(){
+    var isLight=document.body.classList.toggle('light');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent=isLight?'☾':'☀';
+    localStorage.setItem('dmndTheme',isLight?'light':'dark');
   }
 };
 // restore theme
