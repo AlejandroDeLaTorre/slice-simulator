@@ -15,6 +15,12 @@
   --green:#1a7a55;--green-br:#22a370;
   --purple:#6c5ce7;--blue:#2980b9;--orange:#c0622b;
 }
+body.light{
+  --bg:#f5f5f3;--bg1:#fff;--bg2:#f0efed;--bg3:#e8e7e4;
+  --border:#dddbd7;--border2:#c8c6c2;
+  --text:#1a1a18;--text2:#666560;--text3:#999891;
+  --red-dim:rgba(192,57,43,.10);
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
 
@@ -154,6 +160,7 @@ footer a:hover{color:var(--text2)}
     <a href="https://blog.dmnd.work/understanding-slice-pplns-jd/" target="_blank">SLICE</a>
     <a href="https://blog.dmnd.work/" target="_blank">Blog</a>
     <a href="https://onboarding.dmnd.work" target="_blank" class="nav-cta">Join Now</a>
+    <button id="themeBtn" onclick="SB.theme()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:5px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;border-radius:4px;transition:all .15s;margin-left:8px" title="Toggle light/dark">☀</button>
   </div>
 </nav>
 
@@ -585,6 +592,15 @@ function drawConclusion(w,roster,totSc){
   '</div>';
 }
 
+window.SB=Object.assign(window.SB||{},{
+  theme:function(){
+    var b=document.body;
+    var isLight=b.classList.toggle('light');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent=isLight?'☾':'☀';
+    localStorage.setItem('dmndTheme',isLight?'light':'dark');
+  }
+});
 window.SB={
   tog:function(){
     S.run=!S.run;
@@ -606,6 +622,9 @@ window.SB={
     draw();
   }
 };
+// restore theme
+var saved=localStorage.getItem('dmndTheme');
+if(saved==='light'){document.body.classList.add('light');var b=document.getElementById('themeBtn');if(b)b.textContent='☾';}
 draw();
 })();
 </script>
