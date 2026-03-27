@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLICE (PPLNS+JD) Live Simulator — DMND Pool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:monospace;font-size:13px;background:#0e0e0e;color:#e0e0e0;padding:24px;min-height:100vh}
+a{color:#BA7517}
+h1{font-size:15px;font-weight:500;color:#fff;margin-bottom:4px}
+.sub{font-size:11px;color:#666;margin-bottom:20px}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:14px}
+.btn{border:0.5px solid #444;background:transparent;color:#888;padding:4px 10px;cursor:pointer;font-family:monospace;font-size:12px;border-radius:6px;transition:background .15s,color .15s}
+.btn:hover{background:#1a1a1a;color:#ccc}
+.btn.on{background:#1e1e1e;color:#e0e0e0;border-color:#666}
+.btn.run{border-color:#BA7517;color:#BA7517;font-weight:500}
+.btn.run.go{background:rgba(186,117,23,.15)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border:0.5px solid #2a2a2a;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.stat{padding:8px 12px;border-right:0.5px solid #2a2a2a}
+.stat:last-child{border-right:none}
+.stat-l{font-size:10px;color:#555;margin-bottom:2px}
+.stat-v{font-size:15px;font-weight:500}
+.grid{display:grid;grid-template-columns:1fr 190px;gap:12px}
+.card{border:0.5px solid #2a2a2a;border-radius:8px;padding:10px 14px;margin-bottom:10px;background:#111}
+.sec{font-size:10px;color:#555;margin-bottom:8px;letter-spacing:.3px}
+.tl{display:flex;align-items:flex-end;gap:3px;overflow-x:auto;min-height:130px;padding-bottom:4px;scrollbar-width:thin}
+.tl::-webkit-scrollbar{height:3px}
+.tl::-webkit-scrollbar-thumb{background:#333}
+.bar-track{height:4px;background:#1e1e1e;border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.legend-row{font-size:11px;color:#888;line-height:2.1}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<h1>SLICE (PPLNS+JD) Live Simulator</h1>
+<p class="sub">DMND Pool · <a href="https://blog.dmnd.work/understanding-slice-pplns-jd/" target="_blank">Understanding SLICE →</a></p>
+
+<div id="app"></div>
+
+<script>
+(function(){
+var LOOKBACK=800,BASE=220;
+var MINERS=[
+  {id:'A',name:'Alpha Farm',col:'#BA7517',hash:0.35,eff:0.96},
+  {id:'B',name:'Beta Pool', col:'#1D9E75',hash:0.25,eff:0.88},
+  {id:'G',name:'Gamma Ops', col:'#7F77DD',hash:0.20,eff:1.00},
+  {id:'D',name:'Delta Mine',col:'#D85A30',hash:0.15,eff:0.72},
+  {id:'E',name:'Epsilon',   col:'#378ADD',hash:0.05,eff:0.55}
+];
+var S={run:false,spd:1,thresh:0.07,fee:12,mmev:12,sStart:12,curr:[],slices:[],idx:0,blocks:0,sel:null,iv:null,tid:0,built:false};
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+function pickM(){var x=Math.random(),a=0;for(var i=0;i<MINERS.length;i++){a+=MINERS[i].hash;if(x<a)return MINERS[i];}return MINERS[4];}
+
+function tick(){
+  S.tid++;
+  S.fee=Math.max(5,Math.min(90,S.fee+(14-S.fee)*0.04+(Math.random()-0.48)*2.4+(Math.random()<0.03?rnd(4,16):0)));
+  if(S.fee>S.mmev)S.mmev=S.fee;
+  if(Math.random()<0.78){
+    var m=pickM();
+    S.curr.push({sid:S.tid,mid:m.id,diff:rnd(0.9,2.1),fee:S.fee*m.eff*rnd(0.92,1.05)});
+  }
+  var rise=(S.mmev-S.sStart)/(S.sStart||1);
+  var blk=Math.random()<0.008;
+  if(S.curr.length>=3&&(rise>=S.thresh||blk)){
+    var mm=S.mmev;
+    var sc=S.curr.map(function(s){return{sid:s.sid,mid:s.mid,diff:s.diff,fee:s.fee,score:(s.fee/mm)*s.diff};});
+    S.slices.push({id:S.idx++,shares:sc,mmev:mm,td:sc.reduce(function(a,s){return a+s.diff;},0),ts:sc.reduce(function(a,s){return a+s.score;},0),reason:blk?'block':'fee'});
+    if(S.slices.length>40)S.slices.shift();
+    S.curr=[];S.sStart=S.fee;S.mmev=S.fee;
+    if(blk)S.blocks++;
+  }
+  draw();
+}
+
+function winSlices(){
+  var all=S.slices.slice();
+  var acc=0,ws=all.length;
+  for(var i=all.length-1;i>=0;i--){acc+=all[i].td;ws=i;if(acc>=LOOKBACK)break;}
+  return{all:all,ws:ws,fill:Math.min(acc/LOOKBACK,1)};
+}
+
+function bs(){return 'btn';}
+
+function buildShell(){
+  if(S.built)return;S.built=true;
+  var app=document.getElementById('app');
+  app.innerHTML=
+    '<div class="ctrl">'+
+    '<span style="color:#555;font-size:11px">speed</span>'+
+    '<button id="sp1" class="btn on" onclick="SB.spd(1)">1×</button>'+
+    '<button id="sp2" class="btn" onclick="SB.spd(2)">2×</button>'+
+    '<button id="sp5" class="btn" onclick="SB.spd(5)">5×</button>'+
+    '<button id="sbRun" class="btn run" onclick="SB.tog()">▶ start</button>'+
+    '<span style="flex:1"></span>'+
+    '<span style="color:#555;font-size:11px">fee Δ threshold</span>'+
+    '<button id="th5"  class="btn"    onclick="SB.thr(0.05)">5%</button>'+
+    '<button id="th7"  class="btn on" onclick="SB.thr(0.07)">7%</button>'+
+    '<button id="th10" class="btn"    onclick="SB.thr(0.10)">10%</button>'+
+    '<button id="th15" class="btn"    onclick="SB.thr(0.15)">15%</button>'+
+    '<button id="th25" class="btn"    onclick="SB.thr(0.25)">25%</button>'+
+    '</div>'+
+    '<div class="stats" id="sbStats"></div>'+
+    '<div class="grid">'+
+      '<div>'+
+        '<div class="card">'+
+          '<div class="sec">mempool fee rate (sat/vB) — amber = current · green line = next slice trigger</div>'+
+          '<div id="sbFeeViz" style="height:54px;display:flex;align-items:flex-end;gap:1px;position:relative"></div>'+
+        '</div>'+
+        '<div class="card">'+
+          '<div style="display:flex;justify-content:space-between;margin-bottom:8px">'+
+            '<span class="sec" style="margin:0">slice timeline · newest right · click to inspect</span>'+
+            '<span style="font-size:10px;color:#555">lookback = 800 diff units</span>'+
+          '</div>'+
+          '<div class="tl" id="sbTL"><div style="width:100%;text-align:center;color:#444;padding:48px 0">press ▶ start</div></div>'+
+          '<div style="margin-top:8px">'+
+            '<div style="display:flex;justify-content:space-between;font-size:10px;color:#555;margin-bottom:3px"><span>lookback window fill</span><span id="sbFillPct">0%</span></div>'+
+            '<div class="bar-track"><div id="sbFillBar" class="bar-fill" style="width:0;background:#BA7517"></div></div>'+
+          '</div>'+
+        '</div>'+
+        '<div id="sbDetailWrap" class="card" style="display:none;border-color:#1D9E75"></div>'+
+      '</div>'+
+      '<div>'+
+        '<div class="card" id="sbRoster"><div class="sec">miner payout share</div><div style="color:#444;font-size:12px;padding:20px 0;text-align:center">waiting for data…</div></div>'+
+        '<div class="card legend-row">'+
+          '<div class="sec">visual encoding</div>'+
+          '▮ height = share difficulty<br>▮ opacity = fee efficiency<br>● = block found<br>↑ = fee threshold<br><span style="color:#555">dim = outside window</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function setOn(id,on){var el=document.getElementById(id);if(el){el.classList.toggle('on',on);}}
+
+function draw(){
+  buildShell();
+  var w=winSlices();
+  var fill=w.fill;
+  var fillPct=(fill*100).toFixed(0)+'%';
+
+  // stats
+  var statsD=[
+    {l:'fee rate',   v:S.fee.toFixed(1),  c:'#BA7517'},
+    {l:'slice MMEV', v:S.mmev.toFixed(1), c:'#1D9E75'},
+    {l:'slices closed',v:S.slices.length, c:''},
+    {l:'blocks found', v:S.blocks,        c:'#7F77DD'},
+    {l:'window fill',  v:fillPct,         c:fill>=1?'#1D9E75':'#BA7517'}
+  ];
+  var el=document.getElementById('sbStats');
+  if(el)el.innerHTML=statsD.map(function(d,i){
+    return '<div class="stat">'+
+      '<div class="stat-l">'+d.l+'</div>'+
+      '<div class="stat-v" style="color:'+(d.c||'#e0e0e0')+'">'+d.v+'</div>'+
+      '</div>';
+  }).join('');
+
+  // fee sparkline
+  var fv=document.getElementById('sbFeeViz');
+  if(fv){
+    var history=S.slices.slice(-15).flatMap(function(s){return[s.mmev];});
+    while(history.length<60)history.unshift(12);
+    history=history.slice(-60);history.push(S.fee);
+    var maxF=Math.max.apply(null,history.concat([S.mmev,S.sStart*(1+S.thresh),20]));
+    var minF=Math.min.apply(null,history.concat([5]));
+    var rng=maxF-minF||1;
+    var trigY=((S.sStart*(1+S.thresh)-minF)/rng*50).toFixed(0);
+    fv.innerHTML=
+      '<div style="position:absolute;bottom:'+trigY+'px;left:0;right:0;height:1px;background:#1D9E75;opacity:.5"></div>'+
+      '<div style="display:flex;align-items:flex-end;gap:1px;height:54px;width:100%">'+
+      history.map(function(v,i){
+        var h=Math.max(2,((v-minF)/rng)*50);
+        var last=i===history.length-1;
+        return '<div style="flex:1;height:'+h.toFixed(0)+'px;background:'+(last?'#BA7517':'rgba(186,117,23,.35)')+';border-radius:1px 1px 0 0"></div>';
+      }).join('')+
+      '</div>'+
+      '<div style="position:absolute;right:2px;bottom:'+(((S.fee-minF)/rng*50)+4).toFixed(0)+'px;font-size:10px;color:#BA7517">'+S.fee.toFixed(1)+'</div>';
+  }
+
+  // timeline
+  var tl=document.getElementById('sbTL');
+  if(tl&&S.slices.length>0){
+    var shown=w.all.slice(-24);
+    var shWs=Math.max(0,w.ws-(w.all.length-shown.length));
+    var maxTd=shown.reduce(function(a,s){return Math.max(a,s.td);},0.1);
+    var CH=120;
+    tl.innerHTML=shown.map(function(sl,idx){
+      var inW=idx>=shWs;
+      var isSel=String(sl.id)===String(S.sel);
+      var badge=sl.reason==='block'?'●':'↑';
+      var bc=sl.reason==='block'?'#7F77DD':'#1D9E75';
+      var colH=Math.max(10,(sl.td/maxTd)*CH);
+      var bdr=isSel?'1.5px solid #1D9E75':inW?'0.5px solid #444':'0.5px solid #222';
+      var bg=inW?'#1a1a1a':'transparent';
+      var shareHtml=sl.shares.map(function(sh){
+        var m=MINERS.filter(function(x){return x.id===sh.mid;})[0]||MINERS[0];
+        var hp=Math.max(2,(sh.diff/sl.td)*colH);
+        var ef=sl.mmev>0?Math.min(sh.fee/sl.mmev,1):0.5;
+        var op=(0.25+ef*0.75).toFixed(2);
+        return '<div style="width:100%;height:'+hp.toFixed(1)+'px;background:'+m.col+';opacity:'+op+';border-top:1px solid rgba(0,0,0,.2);flex-shrink:0"></div>';
+      }).join('');
+      return '<div onclick="SB.sel(\''+sl.id+'\')" style="flex-shrink:0;width:38px;cursor:pointer;display:flex;flex-direction:column;align-items:center">'+
+        '<div style="font-size:11px;color:'+bc+';height:16px;text-align:center;line-height:16px">'+badge+'</div>'+
+        '<div style="width:100%;height:'+CH+'px;display:flex;flex-direction:column;justify-content:flex-end">'+
+          '<div style="width:100%;height:'+colH.toFixed(0)+'px;border-radius:3px;overflow:hidden;background:'+bg+';border:'+bdr+';display:flex;flex-direction:column-reverse">'+shareHtml+'</div>'+
+        '</div>'+
+        '<div style="font-size:9px;color:'+(inW?'#555':'#333')+';margin-top:2px;text-align:center">#'+sl.id+'</div>'+
+      '</div>';
+    }).join('');
+    tl.scrollLeft=tl.scrollWidth;
+  }
+
+  // fill bar
+  var fb=document.getElementById('sbFillBar');if(fb){fb.style.width=fillPct;fb.style.background=fill>=1?'#1D9E75':'#BA7517';}
+  var fp=document.getElementById('sbFillPct');if(fp)fp.textContent=fillPct;
+
+  // roster
+  var allWin=w.all.slice(w.ws).flatMap(function(sl){return sl.shares.map(function(sh){return{mid:sh.mid,score:sh.score||0};});});
+  var totSc=allWin.reduce(function(a,s){return a+s.score;},0);
+  var roster=MINERS.map(function(m){
+    var sc=allWin.filter(function(s){return s.mid===m.id;}).reduce(function(a,s){return a+s.score;},0);
+    return{m:m,pct:totSc>0?sc/totSc:m.hash};
+  }).sort(function(a,b){return b.pct-a.pct;});
+  var ros=document.getElementById('sbRoster');
+  if(ros)ros.innerHTML='<div class="sec">miner payout share (window)</div>'+roster.map(function(r){
+    var diff=((r.pct-r.m.hash)*100).toFixed(1);
+    var diffCol=diff>0?'#1D9E75':diff<0?'#D85A30':'#555';
+    var diffStr=diff>0?'+'+diff+'%':diff+'%';
+    return '<div style="margin-bottom:12px">'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'+
+        '<div style="width:7px;height:7px;border-radius:1px;background:'+r.m.col+'"></div>'+
+        '<div style="flex:1;font-size:12px;font-weight:500;color:#ddd">'+r.m.name+'</div>'+
+        '<div style="font-size:11px;color:'+diffCol+'">'+diffStr+'</div>'+
+        '<div style="font-size:12px;color:'+r.m.col+';min-width:38px;text-align:right">'+(r.pct*100).toFixed(1)+'%</div>'+
+      '</div>'+
+      '<div style="font-size:10px;color:#555;margin-bottom:3px">hash '+(r.m.hash*100).toFixed(0)+'% · eff '+(r.m.eff*100).toFixed(0)+'%</div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(r.pct*100).toFixed(1)+'%;background:'+r.m.col+'"></div></div>'+
+    '</div>';
+  }).join('');
+
+  // detail panel
+  if(S.sel!==null){
+    var dw=document.getElementById('sbDetailWrap');
+    var sl2=w.all.filter(function(s){return String(s.id)===String(S.sel);})[0];
+    if(sl2&&dw){
+      dw.style.display='block';
+      var totSl=sl2.ts||0.001;
+      var byM=MINERS.map(function(m){
+        var shs=sl2.shares.filter(function(s){return s.mid===m.id;});
+        var sc=shs.reduce(function(a,s){return a+s.score;},0);
+        var avgEff=shs.length?shs.reduce(function(a,s){return a+s.fee;},0)/shs.length/(sl2.mmev||1):0;
+        return{m:m,n:shs.length,score:sc,avgEff:avgEff};
+      }).filter(function(x){return x.n>0;}).sort(function(a,b){return b.score-a.score;});
+      var rc=sl2.reason==='block'?'#7F77DD':'#1D9E75';
+      var rl=sl2.reason==='block'?'● block found':'↑ fee threshold';
+      dw.innerHTML='<div style="font-size:10px;color:'+rc+';margin-bottom:10px;font-weight:500">'+
+        'slice #'+sl2.id+' · '+rl+' · MMEV: '+sl2.mmev.toFixed(2)+' sat/vB · '+sl2.shares.length+' shares · '+sl2.td.toFixed(1)+' diff'+
+        ' <button onclick="SB.sel(null)" style="float:right;background:transparent;border:none;color:#555;cursor:pointer;font-size:12px">✕</button>'+
+      '</div>'+
+      byM.map(function(x){
+        var sp=totSl>0?(x.score/totSl*100).toFixed(1):0;
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">'+
+          '<div style="width:6px;height:6px;border-radius:1px;background:'+x.m.col+';flex-shrink:0"></div>'+
+          '<div style="font-size:11px;width:80px;color:'+x.m.col+'">'+x.m.name+'</div>'+
+          '<div style="font-size:10px;color:#555;width:80px">'+x.n+' sh · eff '+(x.avgEff*100).toFixed(0)+'%</div>'+
+          '<div style="flex:1;height:4px;background:#1e1e1e;border-radius:2px;overflow:hidden">'+
+            '<div style="height:100%;width:'+sp+'%;background:'+x.m.col+';border-radius:2px"></div>'+
+          '</div>'+
+          '<div style="font-size:11px;width:38px;text-align:right;color:#ccc">'+sp+'%</div>'+
+        '</div>';
+      }).join('');
+    }
+  }
+}
+
+window.SB={
+  tog:function(){
+    S.run=!S.run;
+    var b=document.getElementById('sbRun');
+    if(b){b.textContent=S.run?'⏸ pause':'▶ start';b.classList.toggle('go',S.run);}
+    if(S.run)S.iv=setInterval(tick,BASE/S.spd);
+    else{clearInterval(S.iv);S.iv=null;}
+  },
+  spd:function(v){
+    S.spd=v;
+    [1,2,5].forEach(function(x){setOn('sp'+x,x===v);});
+    if(S.run){clearInterval(S.iv);S.iv=setInterval(tick,BASE/v);}
+  },
+  thr:function(v){
+    S.thresh=v;
+    [5,7,10,15,25].forEach(function(x){setOn('th'+x,Math.abs(v-x/100)<0.001);});
+  },
+  sel:function(id){
+    S.sel=(id===null||String(S.sel)===String(id))?null:id;
+    if(S.sel===null){var dw=document.getElementById('sbDetailWrap');if(dw)dw.style.display='none';}
+    draw();
+  }
+};
+
+draw();
+})();
+</script>
+</body>
+</html>
