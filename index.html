@@ -506,17 +506,11 @@ var WT={
   skip:function(){
     var bg=gi('wtBg');
     if(bg){bg.style.opacity='0';bg.style.transition='opacity .2s';setTimeout(function(){bg.style.display='none';},200);}
-    try{localStorage.setItem('sliceWTdone','1');}catch(e){}
   }
 };
 
 // init walkthrough
-(function(){
-  var done=false;
-  try{done=localStorage.getItem('sliceWTdone')==='1';}catch(e){}
-  if(done){gi('wtBg').style.display='none';}
-  else{renderWT();}
-})();
+renderWT();
 
 // ── EVENT LOG ─────────────────────────────────────────────────────────
 function addLog(icon,html,type){
